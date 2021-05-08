@@ -1,62 +1,175 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+Step 1: Install Laravel 8
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+I am going to explain step by step from scratch so, we need to get fresh Laravel 8 application using bellow command, So open your terminal OR command prompt and run bellow command:
 
-## About Laravel
+composer create-project --prefer-dist laravel/laravel blog
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Step 2: Install dompdf Package
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+first of all we will install barryvdh/laravel-dompdf composer package by following composer command in your laravel 8 application.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+composer require barryvdh/laravel-dompdf
 
-## Learning Laravel
+After successfully install package, open config/app.php file and add service provider and alias.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+config/app.php
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+'providers' => [
 
-## Laravel Sponsors
+	....
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+	Barryvdh\DomPDF\ServiceProvider::class,
 
-### Premium Partners
+],
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
+  
 
-## Contributing
+'aliases' => [
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+	....
 
-## Code of Conduct
+	'PDF' => Barryvdh\DomPDF\Facade::class,
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+]
 
-## Security Vulnerabilities
+Read Also: How to Generate PDF with Graph in Laravel?
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Step 3: Add Route
 
-## License
+In this is step we need to create routes for items listing. so open your "routes/web.php" file and add following route.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+routes/web.php
+
+<?php
+
+  
+
+use Illuminate\Support\Facades\Route;
+
+  
+
+use App\Http\Controllers\PDFController;
+
+  
+
+/*
+
+|--------------------------------------------------------------------------
+
+| Web Routes
+
+|--------------------------------------------------------------------------
+
+|
+
+| Here is where you can register web routes for your application. These
+
+| routes are loaded by the RouteServiceProvider within a group which
+
+| contains the "web" middleware group. Now create something great!
+
+|
+
+*/
+
+  
+
+Route::get('generate-pdf', [PDFController::class, 'generatePDF']);
+
+Step 4: Add Controller
+
+Here,we require to create new controller PDFController that will manage generatePDF method of route. So let's put bellow code.
+
+app/Http/Controllers/PDFController.php
+
+<?php
+
+  
+
+namespace App\Http\Controllers;
+
+  
+
+use Illuminate\Http\Request;
+
+use PDF;
+
+  
+
+class PDFController extends Controller
+
+{
+
+    /**
+
+     * Display a listing of the resource.
+
+     *
+
+     * @return \Illuminate\Http\Response
+
+     */
+
+    public function generatePDF()
+
+    {
+
+        $data = [
+
+            'title' => 'Welcome to ItSolutionStuff.com',
+
+            'date' => date('m/d/Y')
+
+        ];
+
+          
+
+        $pdf = PDF::loadView('myPDF', $data);
+
+    
+
+        return $pdf->download('itsolutionstuff.pdf');
+
+    }
+
+}
+
+Step 5: Create View File
+
+In Last step, let's create myPDF.blade.php(resources/views/myPDF.blade.php) for layout of pdf file and put following code:
+
+resources/views/myPDF.blade.php
+
+Read Also: Laravel 8 Auth with Inertia JS Jetstream Tutorial
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <title>Hi</title>
+
+</head>
+
+<body>
+
+    <h1>{{ $title }}</h1>
+
+    <p>{{ $date }}</p>
+
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+
+    tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+
+    quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+
+    consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+
+    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+
+    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+</body>
+
+</html>
